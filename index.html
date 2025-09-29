@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Posting Improvement Minigame - 9 Levels</title>
+    <!-- Load Tailwind CSS for styling and responsiveness -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Custom styles for the theme and interactive elements */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+            color: #1f2937;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        .game-screen {
+            background-color: white;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.5s ease-in-out;
+            min-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .quiz-option {
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        .quiz-option:disabled {
+            cursor: not-allowed;
+        }
+        .score-bar {
+            height: 12px;
+            border-radius: 9999px;
+            transition: width 0.8s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="text-center py-6 md:py-8">
+        <h1 class="text-3xl md:text-4xl font-extrabold text-teal-600">The Job Posting Fixer Minigame</h1>
+        <p class="mt-2 text-lg text-gray-700">Improve job posting metrics one level at a time.</p>
+    </header>
+
+    <main id="game-container" class="game-screen">
+        
+        <!-- Screen 1: Start Screen -->
+        <div id="start-screen" class="text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Welcome, HR Manager!</h2>
+            <p class="text-gray-600 mb-6 max-w-md mx-auto">Your task is to fix a poorly written job posting. For each section, select the option that best balances **Clarity, Inclusivity, and Transparency**.</p>
+            <button onclick="showInstructions()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-200 transform hover:scale-105">
+                Start Game
+            </button>
+        </div>
+
+        <!-- Screen 2: Instruction Screen -->
+        <div id="instruction-screen" class="hidden text-center max-w-xl mx-auto">
+            <h2 class="text-3xl font-bold text-gray-800 mb-6">How to Play (9 Levels)</h2>
+            <div class="space-y-4 text-left text-gray-700 mb-8">
+                <p><span class="font-bold text-lg text-blue-600">The Goal:</span> For each of the **9 sections** (levels) in the posting, choose the option that maximizes quality for the candidate.</p>
+                <p><span class="font-bold text-lg text-blue-600">The Score:</span> Your final score will be judged on three key metrics: **Clarity**, **Inclusivity**, and **Transparency**. Your choices secretly affect these scores!</p>
+                <p><span class="font-bold text-lg text-blue-600">Feedback:</span> You will receive instant feedback after each choice, but the full metric scores won't be revealed until the end.</p>
+            </div>
+            <button onclick="loadQuestion()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-200 transform hover:scale-105">
+                Start Level 1
+            </button>
+        </div>
+
+        <!-- Screen 3: Question Screen (Levels 1-9) -->
+        <div id="question-screen" class="hidden">
+            <div class="mb-6 pb-4 border-b border-gray-200">
+                <p class="text-sm font-semibold text-teal-600" id="current-level-info"></p>
+                <h2 class="text-2xl font-bold text-gray-800" id="question-category"></h2>
+            </div>
+            
+            <!-- Job Posting Artifact (Current Section Only) -->
+            <div id="artifact-snippet" class="p-4 mb-6 border-l-4 border-red-500 bg-red-50 rounded-r-lg shadow-inner">
+                <p class="font-semibold text-red-800 mb-1">Current Flawed Snippet:</p>
+                <p class="text-red-700 italic" id="artifact-text"></p>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-700 mb-4" id="question-text"></h3>
+            
+            <div id="options-container" class="space-y-3 mb-6">
+                <!-- Options will be injected here -->
+            </div>
+
+            <!-- Inline Feedback Box -->
+            <div id="inline-feedback-box" class="mt-6 p-4 rounded-xl shadow-lg border-2 hidden">
+                <h4 id="feedback-title" class="text-xl font-bold mb-2"></h4>
+                <p id="feedback-text" class="text-gray-700 mb-4"></p>
+                <button onclick="nextQuestion()" class="py-2 px-4 rounded-lg text-white font-semibold transition duration-200" id="feedback-button">
+                    Next Level
+                </button>
+            </div>
+            
+        </div>
+
+        <!-- Screen 4: Scorecard Screen -->
+        <div id="scorecard-screen" class="hidden text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-6">Analysis Complete!</h2>
+            <p class="text-lg text-gray-600 mb-8">You have reviewed all 9 critical sections. Here is your final quality rating:</p>
+
+            <div id="final-rating-badge" class="mb-10">
+                <!-- Badge will be injected here -->
+            </div>
+            
+            <h3 class="text-2xl font-semibold text-gray-700 mb-6">Final Metric Scores</h3>
+            <div id="final-metrics" class="space-y-4 max-w-sm mx-auto mb-10">
+                <!-- Final metric scores will be injected here -->
+            </div>
+
+            <button onclick="window.location.reload()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-3 px-8 rounded-full shadow-lg transition duration-200 transform hover:scale-105">
+                Review and Try Again
+            </button>
+        </div>
+    </main>
+</div>
+
+<script>
+    // --- Data Model: Questions, Artifact Snippets, and Metric Mapping (9 Levels) ---
+    const QUESTIONS = [
+        {
+            level: 1,
+            category: "Job Title",
+            artifact: "Rockstar Ninja Marketing Wizard III - Top-Secret Ops Role",
+            question: "Which of these titles is the most effective and searchable for a role focused on managing digital content?",
+            options: [
+                { text: "Digital Marketing Specialist", scoreImpact: { Clarity: 2, Inclusivity: 0, Transparency: 0 }, feedback: "Correct! Clear, standard titles are easily searchable and maximize candidate reach. Avoid overly creative titles." },
+                { text: "Content Guru/Growth Hacker", scoreImpact: { Clarity: -2, Inclusivity: 0, Transparency: 0 }, feedback: "Buzzwords are confusing and rarely searchable. This severely harms clarity." },
+                { text: "Marketing Department Opening", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Too generic. This offers no clarity on seniority, scope, or function." },
+                { text: "Marketing Associate (Experience Required)", scoreImpact: { Clarity: 1, Inclusivity: 0, Transparency: 0 }, feedback: "Good clarity on the title, but 'Experience Required' is unnecessary and vague." },
+                { text: "Senior Marketing Manager", scoreImpact: { Clarity: 0, Inclusivity: 0, Transparency: 0 }, feedback: "If the role is entry-level, using a 'Senior' title misleads candidates and confuses job boards." },
+                { text: "Digital Marketing Specialist (Pay Negotiable)", scoreImpact: { Clarity: 2, Inclusivity: 0, Transparency: -1 }, feedback: "The title is excellent (+2 Clarity), but 'Pay Negotiable' without a range hurts Transparency." }
+            ]
+        },
+        {
+            level: 2,
+            category: "Job Summary",
+            artifact: "Need a dynamic, multi-talented individual to lead our mission-critical efforts. Must be a self-starter and team-player. Pay TBD.",
+            question: "How do you improve the summary's transparency and set realistic expectations?",
+            options: [
+                { text: "A single sentence: 'The team is currently looking for the best talent in the country to help us revolutionize the industry.'", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Pure corporate jargon. It provides no clarity on the job's purpose." },
+                { text: "A 2-3 sentence overview of the role's primary purpose and function within the department.", scoreImpact: { Clarity: 1, Inclusivity: 0, Transparency: 0 }, feedback: "This is a basic requirement. It improves clarity by defining the scope and purpose." },
+                { text: "List all company perks (free snacks, ping-pong, weekly happy hour).", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Perks are secondary to purpose. Placing them in the summary detracts from professional clarity." },
+                { text: "Briefly state the role's purpose and mention the typical weekly commitment is 40-45 hours.", scoreImpact: { Clarity: 1, Inclusivity: 0, Transparency: 1 }, feedback: "Excellent. Defining the role's function (Clarity) and providing an honest view of the workload (Transparency) builds trust." },
+                { text: "Describe the role as highly competitive and mention that only 'A-players' will be considered.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "Using aggressive, exclusionary language like 'A-players' harms inclusivity." },
+                { text: "Structure the summary to include Q3 KPI achievements, detailing the 15% revenue growth and 8% efficiency increase the new hire must maintain.", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "This is data-rich but irrelevant. The summary must define the role's purpose for the candidate, not serve as a shareholder report. It lacks job clarity." }
+            ]
+        },
+        {
+            level: 3,
+            category: "Responsibilities",
+            artifact: "Oversee all inbound and outbound communications. Manage vendor relationships. Fill in wherever necessary to ensure smooth operations. Be a 'utility player.'",
+            question: "Which option sets clear, measurable, and outcome-focused responsibilities for a professional role?",
+            options: [
+                { text: "List 10+ specific, low-level tasks the candidate will perform daily (e.g., 'Check team calendar,' 'Schedule meetings').", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Too many low-value tasks make the job sound administrative and fails to convey the strategic value of the role." },
+                { text: "Use ambiguous terms like 'Oversee synergistic efforts' and 'maximize value creation.'", scoreImpact: { Clarity: -2, Inclusivity: 0, Transparency: 0 }, feedback: "Buzzwords are confusing and offer zero clarity on what the job actually entails. Huge clarity penalty." },
+                { text: "Structure responsibilities as 4-6 measurable bullet points focusing on outcomes and goals (e.g., 'Increase social engagement by 20%', 'Maintain blog schedule of 2 posts/week').", scoreImpact: { Clarity: 2, Inclusivity: 1, Transparency: 0 }, feedback: "The best choice. Focusing on measurable outcomes provides maximum clarity and structure. This also aids inclusivity by clearly defining success." },
+                { text: "State only two vague responsibilities: 'Lead marketing execution' and 'Handle everything related to the brand.'", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Still too vague. Candidates need to see the scope and weight of the role to determine fit." },
+                { text: "Require candidate to 'be available 24/7' to handle urgent responsibilities.", scoreImpact: { Clarity: 0, Inclusivity: -2, Transparency: 0 }, feedback: "This is a severe red flag that destroys inclusivity and signals a poor work-life balance." },
+                { text: "Include a long list of technology systems the person will use, regardless of frequency (e.g., 'Proficiency with all 20 of our proprietary tools').", scoreImpact: { Clarity: 1, Inclusivity: -1, Transparency: 0 }, feedback: "Listing tools is good clarity, but listing too many unnecessary tools creates artificial barriers for qualified candidates (-I)." }
+            ]
+        },
+        {
+            level: 4,
+            category: "Required Qualifications",
+            artifact: "Must have a college degree (preferred from a 'top-tier' university) and at least 7 years of high-level experience.",
+            question: "Which option provides the most realistic and **Inclusive** set of **Required Qualifications** for a mid-level role?",
+            options: [
+                { text: "Bachelor's degree or equivalent experience; 3-5 years relevant experience.", scoreImpact: { Clarity: 1, Inclusivity: 2, Transparency: 0 }, feedback: "Excellent. 'Or equivalent experience' eliminates degree bias (Inclusivity), and right-sizing the experience level (Clarity) maximizes the quality of your candidate pool." },
+                { text: "Must have 10+ years of experience and a PhD for this entry-level role.", scoreImpact: { Clarity: -1, Inclusivity: -2, Transparency: 0 }, feedback: "Contradictory and wildly unrealistic demands. This severely limits the candidate pool and shows a lack of clarity about the role's level." },
+                { text: "Requires a Master's degree and must be under 30 years old.", scoreImpact: { Clarity: 0, Inclusivity: -3, Transparency: 0 }, feedback: "Age requirements are discriminatory and illegal. A major penalty to inclusivity." },
+                { text: "5+ years of relevant experience or certified professional accreditation in a secondary domain (PMP, Six Sigma, etc.).", scoreImpact: { Clarity: 1, Inclusivity: -1, Transparency: 0 }, feedback: "While specific, requiring niche, costly certifications for a non-management role creates an unnecessary financial barrier, reducing inclusivity without boosting job clarity." },
+                { text: "7+ years of experience in high-growth startups only.", scoreImpact: { Clarity: 1, Inclusivity: -1, Transparency: 0 }, feedback: "Restricting experience to a specific sector (startups) creates an unnecessary barrier for skilled professionals from other sectors." },
+                { text: "Ability to lift 50 lbs, regardless of role needs; high emotional intelligence.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "Adding irrelevant physical requirements or subjective soft skills harms inclusivity." }
+            ]
+        },
+        {
+            level: 5,
+            category: "Preferred Qualifications",
+            artifact: "Preference for candidates who are under 30, energetic, and have a high-growth startup background.",
+            question: "How should you effectively describe **Preferred Qualifications** to maximize clarity and minimize bias?",
+            options: [
+                { text: "Proficiency with HubSpot or Salesforce; experience working with international teams.", scoreImpact: { Clarity: 1, Inclusivity: 1, Transparency: 0 }, feedback: "Best practice. Listing specific, non-essential skills (Clarity) avoids bias and broadens the definition of a 'good fit' (Inclusivity)." },
+                { text: "Strong 'culture fit' is preferred, with a focus on people who are highly extroverted.", scoreImpact: { Clarity: -1, Inclusivity: -1, Transparency: 0 }, feedback: "Subjective terms like 'culture fit' and bias toward personality types (extroverted) harm clarity and inclusivity." },
+                { text: "A preference for candidates who are local and can commute easily.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "Focusing on local candidates can limit diversity and harm inclusivity without a clear business reason." },
+                { text: "Preference for candidates who can seamlessly transition into a competitive sales environment.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "If this is not a sales job, this language can be misleading and exclusionary." },
+                { text: "No Preferred Qualifications are needed; only list the Required ones.", scoreImpact: { Clarity: 0, Inclusivity: 0, Transparency: 0 }, feedback: "A neutral choice. Listing relevant preferred skills can actually help attract specialized talent, but this choice avoids bias." },
+                { text: "Preference for people who worked at our competitor company for 5+ years.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "While specific, this creates an undue preference that limits the talent pool unnecessarily (-I)." }
+            ]
+        },
+        {
+            level: 6,
+            category: "Compensation & Benefits",
+            artifact: "Salary will be competitive and negotiated based on experience. Dental plan and flexible hours. Must work on-site 5 days a week.",
+            question: "Which option provides the maximum **Transparency** and **Clarity** on compensation and work structure?",
+            options: [
+                { text: "List all benefits but still use 'competitive' pay.", scoreImpact: { Clarity: 0, Inclusivity: 0, Transparency: -1 }, feedback: "While good benefits are transparent, avoiding a salary range means the compensation is still largely opaque. (-T)" },
+                { text: "State the salary range ($50k-$60k), list specific benefits (401k match, PTO structure), and define the hybrid/remote policy.", scoreImpact: { Clarity: 1, Inclusivity: 0, Transparency: 2 }, feedback: "The gold standard. Providing a range, specific benefits, and the work location policy builds maximum trust and transparency." },
+                { text: "Offer a maximum pay band of '$80k' but fail to list the minimum salary, stating only 'salary will be determined on interview performance.'", scoreImpact: { Clarity: 0, Inclusivity: 0, Transparency: -1 }, feedback: "Listing a maximum without a minimum is misleading. It violates the spirit of transparency by baiting candidates while reserving the right to offer a much lower salary." },
+                { text: "Provide a wide salary range (e.g., '$40k to $100k') and say 'flexible location'.", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "A range that is too broad is almost as bad as no range. It lacks clarity about the actual pay band." },
+                { text: "Only mention 'extensive professional development opportunities' and 'a great team'.", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: -2 }, feedback: "Vague, unquantifiable benefits and zero salary transparency are major red flags." },
+                { text: "State the role is 100% remote but refuse to provide any salary information.", scoreImpact: { Clarity: 0, Inclusivity: 1, Transparency: -2 }, feedback: "Remote work is inclusive, but zero pay transparency is highly damaging. Transparency is more critical here." }
+            ]
+        },
+        {
+            level: 7,
+            category: "Culture & Values",
+            artifact: "We're a fast-paced, hustle culture. You must be willing to give 110% every day. Expect long hours.",
+            question: "How do you describe the work environment realistically, while maximizing **Inclusivity** and **Transparency**?",
+            options: [
+                { text: "Focus solely on vague keywords like 'passionate,' 'dedicated,' and 'disruptive.'", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Meaningless buzzwords lack clarity and fail to communicate what the day-to-day culture actually feels like." },
+                { text: "Explicitly state the company values (e.g., Integrity, Customer Focus, Collaboration) and provide a link to the culture page.", scoreImpact: { Clarity: 1, Inclusivity: 1, Transparency: 0 }, feedback: "Good choice. Specific values (Clarity) are more honest than vague adjectives and are generally more inclusive." },
+                { text: "Describe the environment as 'competitive, demanding, and highly selective' to attract the best.", scoreImpact: { Clarity: 0, Inclusivity: -2, Transparency: 0 }, feedback: "This type of language is aggressively exclusionary and will alienate many highly qualified candidates." },
+                { text: "Describe a realistic workday, focusing on collaboration and team support, and mention the standard work hours (e.g., 9-to-5:30).", scoreImpact: { Clarity: 0, Inclusivity: 2, Transparency: 1 }, feedback: "Excellent. Removing 'hustle' language (Inclusivity) and defining work hours (Transparency) are huge trust builders." },
+                { text: "Promise that the new hire will get to 'work closely with the CEO' on a 'secret project.'", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Gimmicky, lacks clarity, and misrepresents the typical working dynamic." },
+                { text: "State that the company celebrates wins with 'beer Fridays' and 'mandatory social events.'", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "While fun, mandatory social events (especially those involving alcohol) can be non-inclusive of different lifestyles." }
+            ]
+        },
+        {
+            level: 8,
+            category: "Inclusivity Statement",
+            artifact: "No dedicated inclusivity or Equal Opportunity Employer (EOE) statement.",
+            question: "Which option provides the most effective and action-oriented **Inclusivity** statement?",
+            options: [
+                { text: "A simple line: 'We hire people from all walks of life.'", scoreImpact: { Clarity: 0, Inclusivity: 0, Transparency: 0 }, feedback: "Neutral. While well-intentioned, this is too generic and lacks the legal weight or impact of a formal EOE statement." },
+                { text: "A standard, formal Equal Opportunity Employer (EOE) statement.", scoreImpact: { Clarity: 0, Inclusivity: 1, Transparency: 0 }, feedback: "Good. This meets the minimum standard for an inclusive hiring process." },
+                { text: "A prominent EOE statement combined with an action-oriented commitment to maintaining a diverse, equitable, and inclusive (DEI) workplace.", scoreImpact: { Clarity: 1, Inclusivity: 2, Transparency: 0 }, feedback: "The strongest choice. The formal statement plus the action-oriented commitment maximizes inclusivity and shows authentic commitment (Clarity)." },
+                { text: "Avoid the statement entirely, believing 'actions speak louder than words.'", scoreImpact: { Clarity: 0, Inclusivity: -2, Transparency: 0 }, feedback: "Ignoring the EOE statement entirely suggests a lack of commitment to diversity and creates legal/inclusivity risk." },
+                { text: "State that the company is 'mostly young and energetic' and 'working to catch up' on diversity.", scoreImpact: { Clarity: 0, Inclusivity: -1, Transparency: 0 }, feedback: "While somewhat transparent about diversity gaps, it uses age-biased language and lacks an action plan, harming inclusivity." },
+                { text: "Include a link to the company's detailed Annual Diversity Report and goals.", scoreImpact: { Clarity: 0, Inclusivity: 1, Transparency: 1 }, feedback: "A strong choice. This uses the EOE statement (Inclusivity) and backs it up with data (Transparency)." }
+            ]
+        },
+        {
+            level: 9,
+            category: "Call to Action",
+            artifact: "If you think you're good enough, send an email to hiring@example.com. We don't accept questions.",
+            question: "Which closing statement sets the clearest expectations and encourages all qualified candidates to apply?",
+            options: [
+                { text: "End with: 'We only want people who will give 110% every day' and require a 10-page portfolio.", scoreImpact: { Clarity: 0, Inclusivity: -2, Transparency: 0 }, feedback: "Unrealistic demands and toxic language destroy inclusivity. A major penalty." },
+                { text: "Provide the exact application URL, list required documents (resume/cover letter), and mention the application review timeline ('reviewed weekly').", scoreImpact: { Clarity: 2, Inclusivity: 0, Transparency: 0 }, feedback: "The best choice. Providing all next steps and setting process expectations (Clarity) is crucial for a positive candidate experience." },
+                { text: "Just say 'Apply here' with a link to the main company homepage.", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Too vague. Candidates may not know where to go on the homepage or what documents are needed." },
+                { text: "Require the applicant to solve a complex coding puzzle via email to qualify for an interview.", scoreImpact: { Clarity: -1, Inclusivity: -1, Transparency: 0 }, feedback: "Creating an unclear, high-effort barrier for the initial application harms clarity and inclusivity." },
+                { text: "Ask candidates to call the hiring manager directly to express interest.", scoreImpact: { Clarity: -1, Inclusivity: 0, Transparency: 0 }, feedback: "Unprofessional and confusing. Application should be standardized for clarity and fairness." },
+                { text: "Include the application link but warn candidates they should only apply if they 'don't care about money.'", scoreImpact: { Clarity: 0, Inclusivity: -2, Transparency: 0 }, feedback: "Highly toxic and unprofessional language that creates an immediate barrier for honest, motivated candidates." }
+            ]
+        }
+    ];
+
+    // --- Metric Configuration (Updated for 9 Levels) ---
+    const METRICS = {
+        // Max scores derived from the new 9-question model: Clarity: 10, Inclusivity: 8, Transparency: 4
+        Clarity: { max: 10, color: 'blue', description: 'How clear, specific, and searchable the job posting is.' },
+        Inclusivity: { max: 8, color: 'green', description: 'How welcoming and free from bias the language and requirements are.' },
+        Transparency: { max: 4, color: 'purple', description: 'How open the posting is about pay, benefits, and work expectations.' }
+    };
+
+    // --- Game State Variables ---
+    let currentQuestionIndex = 0;
+    let metricScores = { Clarity: 0, Inclusivity: 0, Transparency: 0 };
+    
+    // --- DOM Elements ---
+    const startScreen = document.getElementById('start-screen');
+    const instructionScreen = document.getElementById('instruction-screen');
+    const questionScreen = document.getElementById('question-screen');
+    const scorecardScreen = document.getElementById('scorecard-screen');
+    
+    const currentLevelInfo = document.getElementById('current-level-info');
+    const questionCategory = document.getElementById('question-category');
+    const artifactText = document.getElementById('artifact-text');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const inlineFeedbackBox = document.getElementById('inline-feedback-box'); 
+    const feedbackTitle = document.getElementById('feedback-title');
+    const feedbackText = document.getElementById('feedback-text');
+    const feedbackButton = document.getElementById('feedback-button');
+    const TOTAL_LEVELS = QUESTIONS.length; // Now 9
+
+    // --- Core Game Logic ---
+
+    /** Shows the instruction screen. */
+    function showInstructions() {
+        startScreen.classList.add('hidden');
+        instructionScreen.classList.remove('hidden');
+    }
+
+    /**
+     * Renders the current question and its options.
+     */
+    function loadQuestion() {
+        if (currentQuestionIndex >= TOTAL_LEVELS) {
+            showScorecard();
+            return;
+        }
+
+        // Screen transition
+        instructionScreen.classList.add('hidden');
+        questionScreen.classList.remove('hidden');
+
+        // Hide feedback box for the new question
+        inlineFeedbackBox.classList.add('hidden');
+
+        const q = QUESTIONS[currentQuestionIndex];
+        
+        // Update Quiz Section Headers
+        currentLevelInfo.textContent = `Level ${q.level} of ${TOTAL_LEVELS}`;
+        questionCategory.textContent = q.category;
+        artifactText.textContent = q.artifact;
+        questionText.textContent = q.question;
+        
+        optionsContainer.innerHTML = '';
+        
+        // Render Options (No score impact displayed here)
+        q.options.forEach((option, index) => {
+            const button = document.createElement('button');
+
+            button.className = `quiz-option w-full text-left bg-gray-50 border border-gray-200 text-gray-700 py-3 px-4 rounded-lg hover:bg-teal-50 hover:border-teal-400 focus:outline-none focus:ring-4 focus:ring-teal-200 transition duration-200 shadow-md`;
+            button.innerHTML = `<span class="font-bold text-lg">${String.fromCharCode(65 + index)}.</span> ${option.text}`;
+            button.onclick = () => handleAnswer(index);
+            optionsContainer.appendChild(button);
+        });
+    }
+
+    /**
+     * Handles the user's choice, updates score (internally), and shows feedback.
+     * @param {number} chosenIndex - The index of the selected option.
+     */
+    function handleAnswer(chosenIndex) {
+        const q = QUESTIONS[currentQuestionIndex];
+        const chosenOption = q.options[chosenIndex];
+        
+        // Disable all buttons to prevent double-clicking
+        Array.from(optionsContainer.children).forEach(btn => btn.disabled = true);
+
+        // Apply score impact internally 
+        const impact = chosenOption.scoreImpact;
+        let scoreChange = false;
+        let netImpact = 0;
+
+        for (const metric in impact) {
+            if (impact[metric] !== 0) {
+                metricScores[metric] += impact[metric];
+                // Clamp scores to be non-negative (cannot go below zero)
+                if (metricScores[metric] < 0) {
+                    metricScores[metric] = 0;
+                }
+                scoreChange = true;
+                netImpact += impact[metric];
+            }
+        }
+        
+        // Determine feedback styling based on net score change
+        let isGood = scoreChange && (netImpact > 0);
+
+        // Highlight the selected option
+        const selectedButton = optionsContainer.children[chosenIndex];
+        selectedButton.classList.add('font-bold', isGood ? 'bg-green-100' : 'bg-red-100');
+        selectedButton.classList.remove('bg-gray-50', 'hover:bg-teal-50');
+
+        showFeedback(chosenOption.feedback, isGood, currentQuestionIndex === TOTAL_LEVELS - 1);
+    }
+
+    /**
+     * Displays an inline message box with feedback.
+     */
+    function showFeedback(text, isGood, isFinal) {
+        inlineFeedbackBox.classList.remove('hidden');
+        inlineFeedbackBox.classList.remove('bg-red-50', 'border-red-400', 'bg-green-50', 'border-green-400'); // Clean up old styles
+        
+        if (isGood) {
+            feedbackTitle.textContent = "Great Insight!";
+            feedbackTitle.classList.remove('text-red-600');
+            feedbackTitle.classList.add('text-green-600');
+            feedbackButton.classList.remove('bg-red-500', 'hover:bg-red-600');
+            feedbackButton.classList.add('bg-green-500', 'hover:bg-green-600');
+            inlineFeedbackBox.classList.add('bg-green-50', 'border-green-400');
+        } else {
+            feedbackTitle.textContent = "Opportunity for Improvement.";
+            feedbackTitle.classList.remove('text-green-600');
+            feedbackTitle.classList.add('text-red-600');
+            feedbackButton.classList.remove('bg-green-500', 'hover:bg-green-600');
+            feedbackButton.classList.add('bg-red-500', 'hover:bg-red-600');
+            inlineFeedbackBox.classList.add('bg-red-50', 'border-red-400');
+        }
+        
+        feedbackText.textContent = text;
+        feedbackButton.textContent = isFinal ? 'View Scorecard' : 'Next Level';
+        feedbackButton.focus(); // Focus the button for accessibility
+    }
+
+    /**
+     * Moves to the next question or the scorecard.
+     */
+    function nextQuestion() {
+        currentQuestionIndex++;
+        loadQuestion();
+    }
+
+    /**
+     * Displays the final scorecard screen with metrics and an overall rating badge.
+     */
+    function showScorecard() {
+        questionScreen.classList.add('hidden');
+        scorecardScreen.classList.remove('hidden');
+
+        let totalScore = 0;
+        let totalMax = 0;
+        let perfectMetrics = 0;
+
+        Object.keys(METRICS).forEach(metric => {
+            totalScore += metricScores[metric];
+            totalMax += METRICS[metric].max;
+            if (metricScores[metric] === METRICS[metric].max) {
+                perfectMetrics++;
+            }
+        });
+
+        const overallPercentage = Math.round((totalScore / totalMax) * 100);
+        
+        let ratingText, ratingColor, trophyIcon;
+        if (overallPercentage === 100) {
+            ratingText = "Gold Badge: Flawless!";
+            ratingColor = "bg-yellow-400 text-yellow-900 border-yellow-600";
+            trophyIcon = '⭐';
+        } else if (overallPercentage >= 85) { // Adjusted threshold for 9 levels
+            ratingText = "Silver Badge: Excellent Work!";
+            ratingColor = "bg-gray-300 text-gray-800 border-gray-500";
+            trophyIcon = '🏆';
+        } else if (overallPercentage >= 70) {
+            ratingText = "Bronze Badge: Good Start!";
+            ratingColor = "bg-amber-700 text-amber-100 border-amber-800";
+            trophyIcon = '🥉';
+        } else {
+            ratingText = "Needs Refinement.";
+            ratingColor = "bg-red-200 text-red-800 border-red-400";
+            trophyIcon = '🛠️';
+        }
+
+        // Display Rating Badge
+        document.getElementById('final-rating-badge').innerHTML = `
+            <div class="${ratingColor} inline-block px-8 py-4 rounded-full text-xl font-extrabold shadow-xl border-4">
+                <span class="mr-2">${trophyIcon}</span> ${ratingText}
+            </div>
+            <p class="text-3xl font-extrabold mt-4 text-gray-900">${overallPercentage}% Overall Quality</p>
+        `;
+
+        // Display Final Metric Scores
+        const finalMetricsEl = document.getElementById('final-metrics');
+        finalMetricsEl.innerHTML = '';
+
+        Object.keys(METRICS).forEach(metric => {
+            const config = METRICS[metric];
+            const score = metricScores[metric];
+            const max = config.max;
+            const percentage = max > 0 ? Math.round((score / max) * 100) : 0;
+            const progressBarColor = score === max ? 'bg-yellow-500' : `bg-${config.color}-500`;
+            const textColor = `text-${config.color}-700`;
+
+            finalMetricsEl.innerHTML += `
+                <div class="space-y-1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-bold text-lg ${textColor}">${metric}:</span>
+                        <span class="text-2xl font-extrabold text-gray-800">${percentage}%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 score-bar">
+                        <div class="score-bar ${progressBarColor}" style="width: ${percentage}%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 italic text-left">${config.description}</p>
+                </div>
+            `;
+        });
+    }
+
+    // Initialize: Only show the start screen
+    window.onload = () => {
+        // Ensure only start screen is visible on load
+        instructionScreen.classList.add('hidden');
+        questionScreen.classList.add('hidden');
+        scorecardScreen.classList.add('hidden');
+        startScreen.classList.remove('hidden');
+    };
+
+</script>
+</body>
+</html>
